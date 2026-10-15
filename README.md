@@ -110,6 +110,9 @@ docker compose up --build
 ```
 This boots **PostgreSQL 16**, **Redis 7**, the **Fastify API Server**, and the **Next.js Web Client**.
 
+### 3. Production Cloud Deployment
+Detailed production guides for **Vercel**, **Railway**, **Render**, **Fly.io**, and **AWS/VPS Nginx + SSL** can be found in [DEPLOYMENT.md](./DEPLOYMENT.md).
+
 ---
 
 ## 🧪 Running Automated Tests

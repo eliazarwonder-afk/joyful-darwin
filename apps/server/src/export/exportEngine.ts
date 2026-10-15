@@ -118,6 +118,22 @@ ${elements}
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+    // Safe text drawing helper to prevent WinAnsiEncoding exceptions with emojis and symbols
+    const safeDrawText = (text: string, options: Parameters<typeof page.drawText>[1]) => {
+      try {
+        const clean = this.sanitizeForPdf(text);
+        if (!clean) return;
+        page.drawText(clean, options);
+      } catch {
+        try {
+          const ascii = text.replace(/[^a-zA-Z0-9 .,!?:;_\-()/@#%&*+=]/g, ' ').trim();
+          if (ascii) page.drawText(ascii, options);
+        } catch {
+          // Gracefully omit unencodable text rather than failing export
+        }
+      }
+    };
+
     // Draw dark background
     page.drawRectangle({
       x: 0,
@@ -128,7 +144,7 @@ ${elements}
     });
 
     // Draw header watermark
-    page.drawText(`${boardTitle} — CollabFlow Export`, {
+    safeDrawText(`${boardTitle} - CollabFlow Export`, {
       x: 20,
       y: bbox.height - 25,
       size: 10,
@@ -154,13 +170,19 @@ ${elements}
         });
 
         if (node.text) {
-          page.drawText(node.text.substring(0, 80), {
-            x: relX + 12,
-            y: relY + node.height - 24,
-            size: 12,
-            font: font,
-            color: rgb(30 / 255, 41 / 255, 59 / 255),
-          });
+          const lines = this.sanitizeForPdf(node.text).split('\n').slice(0, 6);
+          let currentY = relY + node.height - 24;
+          for (const line of lines) {
+            if (currentY < relY + 10) break;
+            safeDrawText(line.substring(0, 50), {
+              x: relX + 12,
+              y: currentY,
+              size: 11,
+              font: font,
+              color: rgb(30 / 255, 41 / 255, 59 / 255),
+            });
+            currentY -= 14;
+          }
         }
       } else if (node.type === 'circle') {
         const radius = Math.min(node.width, node.height) / 2;
@@ -170,8 +192,18 @@ ${elements}
           size: radius,
           color: rgb(color.r, color.g, color.b),
         });
+
+        if (node.text) {
+          safeDrawText(node.text.substring(0, 30), {
+            x: relX + 10,
+            y: relY + radius - 5,
+            size: 11,
+            font: font,
+            color: rgb(30 / 255, 41 / 255, 59 / 255),
+          });
+        }
       } else if (node.type === 'text') {
-        page.drawText(node.text || 'Text', {
+        safeDrawText(node.text || 'Text', {
           x: relX,
           y: relY,
           size: node.fontSize || 16,
@@ -261,6 +293,25 @@ ${elements}
       g: ((bigint >> 8) & 255) / 255,
       b: (bigint & 255) / 255,
     };
+  }
+
+  /**
+   * Sanitize strings for PDF standard Helvetica font (WinAnsi encoding)
+   * Strips emojis and normalizes typographic symbols
+   */
+  private static sanitizeForPdf(text: string): string {
+    if (!text) return '';
+    return text
+      .replace(/[\u2014\u2013]/g, '-')
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/\u2026/g, '...')
+      .replace(/\u2022/g, '*')
+      // Strip emojis (surrogate pairs and unicode symbols outside WinAnsi)
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
+      // Strip characters outside printable ASCII / Latin-1 range
+      .replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, '')
+      .trim();
   }
 
   private static escapeXml(unsafe: string): string {

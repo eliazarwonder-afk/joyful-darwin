@@ -58,4 +58,28 @@ describe('ExportEngine', () => {
     expect(pdfBytes).toBeInstanceOf(Uint8Array);
     expect(pdfBytes.byteLength).toBeGreaterThan(500);
   });
+
+  it('safely handles emojis without throwing WinAnsi encoding errors', async () => {
+    const emojiNodes: CanvasNode[] = [
+      {
+        id: 'node-emoji',
+        type: 'sticky',
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 180,
+        fill: '#FEF08A',
+        stroke: '#EAB308',
+        strokeWidth: 2,
+        text: '✨ Welcome to your new board! 🚀\nDrag to move, click to edit! ⚙️',
+        zIndex: 1,
+        updatedBy: 'Alex',
+        updatedAt: Date.now(),
+      },
+    ];
+
+    await expect(
+      ExportEngine.generatePdf(emojiNodes, '✨ Launch Sprint 🚀')
+    ).resolves.toBeInstanceOf(Uint8Array);
+  });
 });
