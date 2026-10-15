@@ -1,0 +1,33 @@
+{
+  "name": "collabflow-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-Time Collaborative Workspace Engine with CRDT Sync and Background Export Pipeline",
+  "scripts": {
+    "dev": "concurrently -n \"shared,server,web\" -c \"blue,green,magenta\" \"pnpm --filter @collabflow/shared dev\" \"pnpm --filter @collabflow/server dev\" \"pnpm --filter @collabflow/web dev\"",
+    "build": "pnpm --filter @collabflow/shared build && pnpm --filter @collabflow/server build && pnpm --filter @collabflow/web build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc -b"
+  },
+  "keywords": [
+    "crdt",
+    "yjs",
+    "websockets",
+    "realtime",
+    "canvas",
+    "bullmq",
+    "fullstack",
+    "typescript"
+  ],
+  "author": "CollabFlow Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
+  }
+}
