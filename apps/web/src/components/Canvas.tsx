@@ -326,19 +326,18 @@ export const Canvas: React.FC<CanvasProps> = ({ client, nodes }) => {
                 height: `${node.height}px`,
                 zIndex: node.zIndex,
               }}
-              className={`group transition-shadow cursor-move ${
+              className={`group transition-all cursor-move rounded-lg ${
                 isSelected
-                  ? 'ring-2 ring-indigo-500 ring-offset-2 ring-offset-slate-950 shadow-2xl'
-                  : 'hover:ring-1 hover:ring-slate-600 shadow-md'
+                  ? 'ring-1 ring-blue-500/90 shadow-[0_2px_12px_rgba(0,0,0,0.15)]'
+                  : 'hover:ring-1 hover:ring-white/20'
               }`}
             >
               {/* Sticky Note */}
               {node.type === 'sticky' && (
                 <div
-                  className="w-full h-full rounded-xl p-4 flex flex-col justify-between shadow-lg"
+                  className="w-full h-full rounded-lg p-3.5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04)] border border-black/[0.08]"
                   style={{
                     backgroundColor: node.fill,
-                    border: `${node.strokeWidth}px solid ${node.stroke}`,
                   }}
                 >
                   {isEditing ? (
@@ -347,16 +346,15 @@ export const Canvas: React.FC<CanvasProps> = ({ client, nodes }) => {
                       onChange={(e) => client?.updateNode(node.id, { text: e.target.value })}
                       onBlur={() => setEditingNodeId(null)}
                       autoFocus
-                      className="w-full h-full bg-transparent resize-none border-none outline-none font-medium text-sm text-slate-800"
+                      className="w-full h-full bg-transparent resize-none border-none outline-none font-normal text-[13px] leading-relaxed text-neutral-800"
                     />
                   ) : (
-                    <div className="font-medium text-sm text-slate-800 whitespace-pre-wrap select-none overflow-hidden">
-                      {node.text || 'Empty note'}
+                    <div className="font-normal text-[13px] leading-relaxed text-neutral-800 whitespace-pre-wrap select-none overflow-hidden">
+                      {node.text || ''}
                     </div>
                   )}
-                  <div className="text-[10px] text-slate-500 font-semibold flex items-center justify-between pt-2 border-t border-black/10">
+                  <div className="text-[10px] text-neutral-500/70 font-mono flex items-center justify-end pt-1">
                     <span>{node.updatedBy}</span>
-                    <span>Sticky</span>
                   </div>
                 </div>
               )}
@@ -364,10 +362,10 @@ export const Canvas: React.FC<CanvasProps> = ({ client, nodes }) => {
               {/* Rectangle */}
               {node.type === 'rectangle' && (
                 <div
-                  className="w-full h-full rounded-lg flex items-center justify-center p-3 text-center shadow-md font-semibold text-sm"
+                  className="w-full h-full rounded-md flex items-center justify-center p-3 text-center shadow-sm font-medium text-xs border border-white/[0.1]"
                   style={{
                     backgroundColor: node.fill,
-                    border: `${node.strokeWidth}px solid ${node.stroke}`,
+                    borderColor: node.stroke,
                     color: node.textColor || '#1E293B',
                   }}
                 >
@@ -378,7 +376,7 @@ export const Canvas: React.FC<CanvasProps> = ({ client, nodes }) => {
                       onChange={(e) => client?.updateNode(node.id, { text: e.target.value })}
                       onBlur={() => setEditingNodeId(null)}
                       autoFocus
-                      className="w-full bg-transparent text-center border-none outline-none font-semibold text-sm text-slate-900"
+                      className="w-full bg-transparent text-center border-none outline-none font-medium text-xs text-neutral-900"
                     />
                   ) : (
                     node.text || ''
@@ -389,10 +387,10 @@ export const Canvas: React.FC<CanvasProps> = ({ client, nodes }) => {
               {/* Circle */}
               {node.type === 'circle' && (
                 <div
-                  className="w-full h-full rounded-full flex items-center justify-center p-3 text-center shadow-md font-semibold text-sm"
+                  className="w-full h-full rounded-full flex items-center justify-center p-3 text-center shadow-sm font-medium text-xs border border-white/[0.1]"
                   style={{
                     backgroundColor: node.fill,
-                    border: `${node.strokeWidth}px solid ${node.stroke}`,
+                    borderColor: node.stroke,
                     color: node.textColor || '#1E293B',
                   }}
                 >
@@ -403,7 +401,7 @@ export const Canvas: React.FC<CanvasProps> = ({ client, nodes }) => {
                       onChange={(e) => client?.updateNode(node.id, { text: e.target.value })}
                       onBlur={() => setEditingNodeId(null)}
                       autoFocus
-                      className="w-full bg-transparent text-center border-none outline-none font-semibold text-sm text-slate-900"
+                      className="w-full bg-transparent text-center border-none outline-none font-medium text-xs text-neutral-900"
                     />
                   ) : (
                     node.text || ''
@@ -480,23 +478,22 @@ export const Canvas: React.FC<CanvasProps> = ({ client, nodes }) => {
             >
               {/* Pointer Icon */}
               <svg
-                width="22"
-                height="22"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
-                style={{ filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.5))' }}
               >
                 <path
                   d="M5.65 2.15a1 1 0 0 0-1.4 1.15l4.5 16.5a1 1 0 0 0 1.9.1l3.5-7 7-3.5a1 1 0 0 0 .1-1.9L5.65 2.15z"
                   fill={user.color}
-                  stroke="#FFFFFF"
-                  strokeWidth="1.5"
+                  stroke="#000000"
+                  strokeWidth="1.2"
                 />
               </svg>
 
               {/* User Name Badge */}
               <div
-                className="ml-4 -mt-1 px-2 py-0.5 rounded-md text-[11px] font-bold text-white shadow-lg whitespace-nowrap"
+                className="ml-3 -mt-0.5 px-1.5 py-0.5 rounded-[3px] text-[10px] font-medium text-white shadow-sm whitespace-nowrap"
                 style={{ backgroundColor: user.color }}
               >
                 {user.name}

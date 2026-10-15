@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileCode, FileText, Image as ImageIcon, Database, CheckCircle2, Loader2, Download } from 'lucide-react';
+import { X, FileCode, FileText, Image as ImageIcon, Database, Loader2, Download, Check } from 'lucide-react';
 import { useCanvasStore } from '../store/canvasStore';
 import { ExportFormat } from '@collabflow/shared';
 
@@ -13,7 +13,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ boardId }) => {
   const { exportModalOpen, setExportModalOpen } = useCanvasStore();
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('svg');
   const [isExporting, setIsExporting] = useState(false);
-  const [exportStage, setExportStage] = useState<'idle' | 'queuing' | 'rendering' | 'ready'>('idle');
+  const [exportStage, setExportStage] = useState<'idle' | 'processing' | 'ready'>('idle');
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,32 +28,32 @@ export const ExportModal: React.FC<ExportModalProps> = ({ boardId }) => {
     {
       id: 'svg',
       label: 'SVG Vector',
-      desc: 'Crisp scalable vector graphic with preserved shapes & colors',
+      desc: 'Scalable vector graphic with preserved text and layers',
       icon: FileCode,
     },
     {
       id: 'pdf',
       label: 'PDF Document',
-      desc: 'Formatted printable PDF generated server-side via pdf-lib',
+      desc: 'Print-ready vector document with multi-line text',
       icon: FileText,
     },
     {
       id: 'png',
       label: 'PNG Image',
-      desc: 'High-resolution raster graphic for presentations and slides',
+      desc: 'High-resolution raster graphic',
       icon: ImageIcon,
     },
     {
       id: 'json',
       label: 'JSON Snapshot',
-      desc: 'Raw serialized CRDT node tree for backup and versioning',
+      desc: 'Raw node tree data for backups and version control',
       icon: Database,
     },
   ];
 
   const handleStartExport = async () => {
     setIsExporting(true);
-    setExportStage('queuing');
+    setExportStage('processing');
     setError(null);
     setDownloadUrl(null);
 
@@ -66,11 +66,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({ boardId }) => {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to submit export job to background queue');
+        throw new Error('Failed to initiate export');
       }
 
       const { job } = await res.json();
-      setExportStage('rendering');
 
       // Poll for job completion
       const pollInterval = setInterval(async () => {
@@ -96,7 +95,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ boardId }) => {
           setIsExporting(false);
           setExportStage('idle');
         }
-      }, 400);
+      }, 350);
     } catch (err: any) {
       setError(err.message || 'Failed to trigger export');
       setIsExporting(false);
@@ -113,24 +112,24 @@ export const ExportModal: React.FC<ExportModalProps> = ({ boardId }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 select-none relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-100">
+      <div className="w-full max-w-sm bg-[#121316] border border-white/[0.08] rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.6)] p-5 select-none relative">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
           <div>
-            <h3 className="text-base font-bold text-white">Export Canvas</h3>
-            <p className="text-xs text-slate-400">Processed by BullMQ background worker engine</p>
+            <h3 className="text-sm font-semibold text-neutral-100">Export Canvas</h3>
+            <p className="text-[11px] text-neutral-500">Choose file format for export</p>
           </div>
           <button
             onClick={handleClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-1 rounded text-neutral-400 hover:text-white hover:bg-white/[0.06] transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Format Selector */}
-        <div className="mt-4 space-y-2">
+        <div className="mt-3.5 space-y-1.5">
           {formats.map((fmt) => {
             const Icon = fmt.icon;
             const isSelected = selectedFormat === fmt.id;
@@ -139,25 +138,25 @@ export const ExportModal: React.FC<ExportModalProps> = ({ boardId }) => {
                 key={fmt.id}
                 disabled={isExporting}
                 onClick={() => setSelectedFormat(fmt.id)}
-                className={`w-full p-3 rounded-xl border flex items-start space-x-3 text-left transition ${
+                className={`w-full p-2.5 rounded-lg border flex items-center space-x-3 text-left transition ${
                   isSelected
-                    ? 'border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500'
-                    : 'border-slate-800 hover:border-slate-700 bg-slate-800/40'
+                    ? 'border-white/20 bg-white/[0.06]'
+                    : 'border-white/[0.04] hover:border-white/[0.08] hover:bg-white/[0.02]'
                 }`}
               >
                 <div
-                  className={`p-2 rounded-lg ${
-                    isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'
+                  className={`p-1.5 rounded ${
+                    isSelected ? 'bg-white text-neutral-950' : 'bg-white/[0.04] text-neutral-400'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-white">{fmt.label}</span>
-                    {isSelected && <span className="w-2 h-2 rounded-full bg-indigo-500" />}
+                    <span className="text-xs font-medium text-neutral-200">{fmt.label}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">{fmt.desc}</p>
+                  <p className="text-[11px] text-neutral-500 truncate">{fmt.desc}</p>
                 </div>
               </button>
             );
@@ -166,48 +165,39 @@ export const ExportModal: React.FC<ExportModalProps> = ({ boardId }) => {
 
         {/* Error message */}
         {error && (
-          <div className="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+          <div className="mt-3 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
             {error}
           </div>
         )}
 
-        {/* Action Button & Status */}
-        <div className="mt-6 pt-4 border-t border-slate-800 flex flex-col space-y-3">
+        {/* Action Button */}
+        <div className="mt-5 pt-3 border-t border-white/[0.06]">
           {exportStage === 'ready' && downloadUrl ? (
             <a
               href={downloadUrl}
               download
               onClick={handleClose}
-              className="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/20 transition"
+              className="w-full py-2 px-3 rounded-lg font-medium text-xs bg-white hover:bg-neutral-200 text-neutral-950 flex items-center justify-center space-x-2 transition shadow-sm"
             >
-              <Download className="w-4 h-4" />
-              <span>Download Exported File</span>
+              <Download className="w-3.5 h-3.5" />
+              <span>Download File</span>
             </a>
           ) : (
             <button
               disabled={isExporting}
               onClick={handleStartExport}
-              className="w-full py-2.5 px-4 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/30 transition"
+              className="w-full py-2 px-3 rounded-lg font-medium text-xs bg-white hover:bg-neutral-200 disabled:opacity-50 text-neutral-950 flex items-center justify-center space-x-2 transition shadow-sm"
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>
-                    {exportStage === 'queuing' ? 'Enqueuing Job in Redis...' : 'Worker Rendering Canvas...'}
-                  </span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Generating {selectedFormat.toUpperCase()}...</span>
                 </>
               ) : (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Generate {selectedFormat.toUpperCase()} Export</span>
-                </>
+                <span>Generate {selectedFormat.toUpperCase()}</span>
               )}
             </button>
           )}
-
-          <p className="text-[11px] text-center text-slate-500">
-            Export jobs are processed asynchronously with exponential backoff & DLQ guarantees.
-          </p>
         </div>
       </div>
     </div>

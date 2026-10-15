@@ -3,16 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  Sparkles,
   Plus,
-  Layout,
+  ArrowUpRight,
   Clock,
-  ArrowRight,
-  Activity,
-  Layers,
-  Cpu,
-  Zap,
   Trash2,
+  FileText,
+  Users,
 } from 'lucide-react';
 import { Board } from '@collabflow/shared';
 
@@ -22,7 +18,6 @@ export default function DashboardPage() {
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [metrics, setMetrics] = useState<any>(null);
 
   const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -40,23 +35,8 @@ export default function DashboardPage() {
     }
   };
 
-  const fetchMetrics = async () => {
-    try {
-      const res = await fetch(`${serverUrl}/api/metrics`);
-      if (res.ok) {
-        const data = await res.json();
-        setMetrics(data);
-      }
-    } catch {
-      // Offline
-    }
-  };
-
   useEffect(() => {
     fetchBoards();
-    fetchMetrics();
-    const interval = setInterval(fetchMetrics, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   const handleCreateBoard = async (e: React.FormEvent) => {
@@ -88,7 +68,7 @@ export default function DashboardPage() {
   const handleDeleteBoard = async (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm('Are you sure you want to delete this board?')) return;
+    if (!confirm('Delete this workspace?')) return;
 
     try {
       await fetch(`${serverUrl}/api/boards/${id}`, { method: 'DELETE' });
@@ -99,215 +79,163 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col overflow-y-auto">
-      {/* Top Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-30">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
-            <Sparkles className="w-5 h-5 text-white" />
+    <div className="min-h-screen bg-[#090A0C] text-neutral-100 flex flex-col font-sans select-none">
+      {/* Minimal Navbar */}
+      <header className="border-b border-white/[0.07] bg-[#090A0C]/80 backdrop-blur-md px-6 py-3.5 flex items-center justify-between sticky top-0 z-30">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-5 h-5 rounded-[4px] bg-white flex items-center justify-center">
+            <div className="w-2.5 h-2.5 bg-neutral-950 rounded-[1px]" />
           </div>
-          <div>
-            <h1 className="font-extrabold text-base tracking-tight text-white flex items-center space-x-2">
-              <span>CollabFlow</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-semibold">
-                v1.0.0
-              </span>
-            </h1>
-            <p className="text-xs text-slate-400">Real-Time CRDT Collaborative Workspace</p>
-          </div>
+          <span className="text-xs font-semibold tracking-tight text-neutral-200">
+            Collabflow
+          </span>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New Board</span>
-          </button>
-        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-white hover:bg-neutral-200 text-neutral-950 transition shadow-sm"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>New Canvas</span>
+        </button>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8 space-y-8">
-        {/* System Architecture & Metric Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex items-center space-x-3 shadow-lg">
-            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-xs text-slate-400 font-medium">Active Canvases</div>
-              <div className="text-lg font-bold text-white">{boards.length}</div>
-            </div>
+      <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-10 space-y-8">
+        {/* Header Section */}
+        <div className="flex items-end justify-between border-b border-white/[0.06] pb-5">
+          <div>
+            <h1 className="text-base font-semibold text-neutral-100">Workspaces</h1>
+            <p className="text-xs text-neutral-500 mt-0.5">
+              Real-time collaborative canvases with CRDT synchronization
+            </p>
           </div>
+          <span className="text-xs text-neutral-500 font-mono">
+            {boards.length} {boards.length === 1 ? 'canvas' : 'canvases'}
+          </span>
+        </div>
 
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex items-center space-x-3 shadow-lg">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <Zap className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-xs text-slate-400 font-medium">Consensus Protocol</div>
-              <div className="text-sm font-bold text-emerald-400">Yjs CRDT Convergence</div>
-            </div>
+        {/* Canvases List */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-36 rounded-xl bg-white/[0.02] border border-white/[0.06] animate-pulse"
+              />
+            ))}
           </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex items-center space-x-3 shadow-lg">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <Cpu className="w-5 h-5" />
+        ) : boards.length === 0 ? (
+          <div className="text-center py-20 border border-dashed border-white/[0.08] rounded-xl p-8 space-y-3">
+            <div className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto text-neutral-400">
+              <FileText className="w-4 h-4" />
             </div>
-            <div>
-              <div className="text-xs text-slate-400 font-medium">Export Queue</div>
-              <div className="text-sm font-bold text-amber-400">
-                {metrics ? `${metrics.queue.completed} Exports Rendered` : 'BullMQ / Redis Ready'}
-              </div>
-            </div>
+            <h3 className="text-xs font-medium text-neutral-200">No canvases created yet</h3>
+            <p className="text-[11px] text-neutral-500 max-w-xs mx-auto">
+              Create a new workspace to start collaborating with real-time presence.
+            </p>
+            <button
+              onClick={() => setShowModal(true)}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-white hover:bg-neutral-200 text-neutral-950 transition shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create Canvas</span>
+            </button>
           </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex items-center space-x-3 shadow-lg">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              <Activity className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-xs text-slate-400 font-medium">Network Latency</div>
-              <div className="text-sm font-bold text-purple-400">&lt; 20ms WebSocket</div>
-            </div>
-          </div>
-        </section>
-
-        {/* Boards List */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white flex items-center space-x-2">
-              <Layout className="w-4 h-4 text-indigo-400" />
-              <span>Your Collaborative Workspaces</span>
-            </h2>
-            <span className="text-xs text-slate-400 font-medium">
-              Multi-user live editing enabled on all rooms
-            </span>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-44 rounded-2xl bg-slate-900/40 border border-slate-800 animate-pulse"
-                />
-              ))}
-            </div>
-          ) : boards.length === 0 ? (
-            <div className="text-center py-16 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-8 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
-                <Layout className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold text-white">No canvas workspaces yet</h3>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                Create your first real-time collaborative board to test live cursor movement and CRDT sync.
-              </p>
-              <button
-                onClick={() => setShowModal(true)}
-                className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition"
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {boards.map((board) => (
+              <Link
+                key={board.id}
+                href={`/board/${board.id}`}
+                className="group relative bg-[#111215]/60 hover:bg-[#141519] border border-white/[0.06] hover:border-white/[0.14] rounded-xl p-4 shadow-sm transition flex flex-col justify-between"
               >
-                <Plus className="w-4 h-4" />
-                <span>Create First Board</span>
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {boards.map((board) => (
-                <Link
-                  key={board.id}
-                  href={`/board/${board.id}`}
-                  className="group relative bg-slate-900/70 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-5 shadow-lg transition-all duration-200 flex flex-col justify-between hover:shadow-indigo-500/10 hover:shadow-xl"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between">
-                      <h3 className="font-bold text-sm text-white group-hover:text-indigo-400 transition truncate max-w-[200px]">
-                        {board.title}
-                      </h3>
-                      <button
-                        onClick={(e) => handleDeleteBoard(e, board.id)}
-                        title="Delete Board"
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <p className="text-xs text-slate-400 line-clamp-2">
-                      {board.description || 'Interactive whiteboard with real-time sync and presence.'}
-                    </p>
+                <div className="space-y-1.5">
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-medium text-xs text-neutral-200 group-hover:text-white transition truncate max-w-[220px]">
+                      {board.title}
+                    </h3>
+                    <button
+                      onClick={(e) => handleDeleteBoard(e, board.id)}
+                      title="Delete"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
+                    {board.description || 'Infinite canvas with notes, shapes, and live sync.'}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-3 border-t border-white/[0.05] flex items-center justify-between text-[11px] text-neutral-500 font-mono">
+                  <div className="flex items-center space-x-1.5">
+                    <Clock className="w-3 h-3 text-neutral-600" />
+                    <span>{new Date(board.updatedAt).toLocaleDateString()}</span>
                   </div>
 
-                  <div className="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                    <div className="flex items-center space-x-1.5">
-                      <Clock className="w-3.5 h-3.5 text-slate-500" />
-                      <span>{new Date(board.updatedAt).toLocaleDateString()}</span>
-                    </div>
-
-                    <div className="flex items-center space-x-1 font-semibold text-indigo-400 group-hover:translate-x-1 transition-transform">
-                      <span>Open Canvas</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
+                  <div className="flex items-center space-x-1 text-neutral-400 group-hover:text-white transition">
+                    <span className="text-[11px] font-sans">Open</span>
+                    <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </main>
 
-      {/* Create Board Modal */}
+      {/* Minimal Create Board Dialog */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 select-none">
-            <h3 className="text-base font-bold text-white">Create New Workspace</h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Initialize a new collaborative canvas with dedicated WebSocket room and CRDT document.
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-100">
+          <div className="w-full max-w-sm bg-[#121316] border border-white/[0.08] rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.6)] p-5 select-none">
+            <h3 className="text-sm font-semibold text-neutral-100">New Canvas</h3>
+            <p className="text-[11px] text-neutral-500 mt-0.5">
+              Create a workspace with real-time CRDT synchronization.
             </p>
 
-            <form onSubmit={handleCreateBoard} className="mt-5 space-y-4">
+            <form onSubmit={handleCreateBoard} className="mt-4 space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Board Title
+                <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                  Title
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Q4 Sprint Architecture"
+                  placeholder="e.g. Architecture Sprint"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-white/[0.08] text-white text-xs focus:border-white/20 focus:outline-none"
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Description (Optional)
+                <label className="block text-[11px] font-medium text-neutral-400 mb-1">
+                  Description <span className="text-neutral-600">(Optional)</span>
                 </label>
                 <textarea
-                  rows={3}
-                  placeholder="Brief description of the board objectives..."
+                  rows={2}
+                  placeholder="Workspace notes..."
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:border-indigo-500 focus:outline-none resize-none"
+                  className="w-full px-2.5 py-1.5 rounded-lg bg-neutral-900 border border-white/[0.08] text-white text-xs focus:border-white/20 focus:outline-none resize-none"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end space-x-3">
+              <div className="pt-2 flex items-center justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-white hover:bg-white/[0.04] transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-neutral-200 text-neutral-950 transition shadow-sm"
                 >
-                  Create Board
+                  Create
                 </button>
               </div>
             </form>

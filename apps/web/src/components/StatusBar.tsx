@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Activity } from 'lucide-react';
+import { Minus, Plus, RotateCcw } from 'lucide-react';
 import { useCanvasStore } from '../store/canvasStore';
 
 interface StatusBarProps {
@@ -9,59 +9,57 @@ interface StatusBarProps {
 }
 
 export const StatusBar: React.FC<StatusBarProps> = ({ nodeCount }) => {
-  const { zoom, setZoom, resetViewport, mousePos } = useCanvasStore();
+  const { zoom, setZoom, resetViewport, mousePos, selectedNodeIds } = useCanvasStore();
 
   const zoomPercent = Math.round(zoom * 100);
 
   return (
-    <footer className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none select-none">
-      {/* Left: Element count & Coordinates */}
-      <div className="pointer-events-auto flex items-center space-x-2 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl px-3 py-1.5 shadow-lg text-xs text-slate-400">
-        <span className="font-semibold text-slate-200">{nodeCount}</span>
-        <span>{nodeCount === 1 ? 'element' : 'elements'}</span>
-        <span className="text-slate-700">•</span>
-        <span>X: {Math.round(mousePos.x)}</span>
-        <span>Y: {Math.round(mousePos.y)}</span>
+    <footer className="absolute bottom-3 left-3.5 right-3.5 z-20 flex items-center justify-between pointer-events-none select-none">
+      {/* Left: Element & Selection Count */}
+      <div className="pointer-events-auto flex items-center space-x-2 bg-[#111215]/80 backdrop-blur-md border border-white/[0.08] rounded-lg px-2.5 py-1 text-[11px] text-neutral-400 shadow-sm">
+        <span className="text-neutral-200 font-medium">
+          {selectedNodeIds.length > 0
+            ? `${selectedNodeIds.length} selected`
+            : `${nodeCount} ${nodeCount === 1 ? 'item' : 'items'}`}
+        </span>
+        <span className="text-neutral-700">•</span>
+        <span className="font-mono text-neutral-500">
+          {Math.round(mousePos.x)}, {Math.round(mousePos.y)}
+        </span>
       </div>
 
-      {/* Center: System Design Watermark */}
-      <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800 text-[11px] text-slate-400">
-        <Activity className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-        <span>CRDT Yjs Consensus Engine • WebSockets Active</span>
-      </div>
-
-      {/* Right: Zoom controls */}
-      <div className="pointer-events-auto flex items-center space-x-1 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-1 shadow-lg text-xs text-slate-300">
+      {/* Right: Minimal Zoom Stepper */}
+      <div className="pointer-events-auto flex items-center space-x-1 bg-[#111215]/80 backdrop-blur-md border border-white/[0.08] rounded-lg p-0.5 shadow-sm text-xs text-neutral-300">
         <button
           onClick={() => setZoom((prev) => Math.max(0.2, prev - 0.1))}
-          className="p-1 rounded-lg hover:bg-slate-800 hover:text-white transition"
-          title="Zoom Out (Ctrl -)"
+          className="p-1 rounded hover:bg-white/[0.08] text-neutral-400 hover:text-white transition"
+          title="Zoom out"
         >
-          <ZoomOut className="w-3.5 h-3.5" />
+          <Minus className="w-3 h-3" />
         </button>
 
         <button
           onClick={resetViewport}
-          className="px-2 py-0.5 rounded-lg hover:bg-slate-800 font-mono text-slate-200 hover:text-white transition"
-          title="Reset Viewport to 100%"
+          className="px-1.5 py-0.5 rounded hover:bg-white/[0.08] font-mono text-[11px] text-neutral-300 hover:text-white transition"
+          title="Reset zoom"
         >
           {zoomPercent}%
         </button>
 
         <button
           onClick={() => setZoom((prev) => Math.min(3.0, prev + 0.1))}
-          className="p-1 rounded-lg hover:bg-slate-800 hover:text-white transition"
-          title="Zoom In (Ctrl +)"
+          className="p-1 rounded hover:bg-white/[0.08] text-neutral-400 hover:text-white transition"
+          title="Zoom in"
         >
-          <ZoomIn className="w-3.5 h-3.5" />
+          <Plus className="w-3 h-3" />
         </button>
 
         <button
           onClick={resetViewport}
-          className="p-1 rounded-lg hover:bg-slate-800 hover:text-white transition text-slate-400"
-          title="Reset Pan & Zoom"
+          className="p-1 rounded hover:bg-white/[0.08] text-neutral-500 hover:text-neutral-300 transition"
+          title="Reset viewport"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <RotateCcw className="w-3 h-3" />
         </button>
       </div>
     </footer>

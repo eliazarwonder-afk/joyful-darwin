@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Share2, Download, ArrowLeft, Check, Sparkles, Wifi, WifiOff } from 'lucide-react';
+import { Share2, Download, ChevronRight, Check } from 'lucide-react';
 import { useCanvasStore } from '../store/canvasStore';
 
 interface HeaderProps {
@@ -32,27 +32,24 @@ export const Header: React.FC<HeaderProps> = ({ boardId, initialTitle, onTitleCh
   };
 
   return (
-    <header className="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-4 flex items-center justify-between z-20 select-none">
-      {/* Left: Navigation & Title */}
-      <div className="flex items-center space-x-3">
+    <header className="h-12 border-b border-white/[0.08] bg-[#0A0B0D]/90 backdrop-blur-md px-3.5 flex items-center justify-between z-20 select-none">
+      {/* Left: Minimal Breadcrumb & Editable Title */}
+      <div className="flex items-center space-x-2">
         <Link
           href="/"
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-          title="Back to Dashboard"
+          className="flex items-center space-x-2 text-neutral-400 hover:text-white transition px-1.5 py-1 rounded"
+          title="Return to workspaces"
         >
-          <ArrowLeft className="w-5 h-5" />
+          {/* Minimalist Vector Logo */}
+          <div className="w-5 h-5 rounded-[4px] bg-white flex items-center justify-center">
+            <div className="w-2.5 h-2.5 bg-neutral-950 rounded-[1px]" />
+          </div>
+          <span className="text-xs font-semibold tracking-tight text-neutral-200">
+            Collabflow
+          </span>
         </Link>
 
-        <div className="flex items-center space-x-2">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-sm tracking-tight text-white hidden sm:inline">
-            CollabFlow
-          </span>
-        </div>
-
-        <div className="h-4 w-px bg-slate-800 mx-1" />
+        <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
 
         {isEditingTitle ? (
           <input
@@ -62,55 +59,49 @@ export const Header: React.FC<HeaderProps> = ({ boardId, initialTitle, onTitleCh
             onBlur={handleTitleSubmit}
             onKeyDown={(e) => e.key === 'Enter' && handleTitleSubmit()}
             autoFocus
-            className="bg-slate-800 text-white font-medium text-sm px-2 py-1 rounded border border-indigo-500 focus:outline-none"
+            className="bg-neutral-900 text-white font-medium text-xs px-2 py-0.5 rounded border border-white/20 focus:outline-none"
           />
         ) : (
           <button
             onClick={() => setIsEditingTitle(true)}
-            className="text-white font-medium text-sm hover:bg-slate-800/80 px-2 py-1 rounded transition text-left truncate max-w-[200px] md:max-w-[320px]"
+            className="text-neutral-300 font-medium text-xs hover:text-white hover:bg-white/[0.04] px-2 py-1 rounded transition text-left truncate max-w-[200px] md:max-w-[320px]"
             title="Click to rename"
           >
             {title}
           </button>
         )}
 
-        {/* Sync Indicator */}
-        <div className="hidden lg:flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-slate-800/60 border border-slate-700/50 text-xs text-slate-400">
-          {syncStatus === 'connected' ? (
-            <>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Synced ({latencyMs}ms)</span>
-            </>
-          ) : syncStatus === 'syncing' ? (
-            <>
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              <span>Syncing...</span>
-            </>
-          ) : (
-            <>
-              <span className="w-2 h-2 rounded-full bg-rose-500" />
-              <span>Offline</span>
-            </>
-          )}
+        {/* Minimal Quiet Status Dot */}
+        <div className="hidden md:flex items-center space-x-1.5 pl-2 text-[11px] font-mono text-neutral-500">
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              syncStatus === 'connected'
+                ? 'bg-emerald-500'
+                : syncStatus === 'syncing'
+                ? 'bg-amber-500 animate-pulse'
+                : 'bg-neutral-600'
+            }`}
+          />
+          <span>{syncStatus === 'connected' ? `${latencyMs}ms` : syncStatus}</span>
         </div>
       </div>
 
-      {/* Right: Presence Avatars & Actions */}
-      <div className="flex items-center space-x-3">
-        {/* Active Collaborators */}
-        <div className="flex items-center -space-x-2 mr-2">
+      {/* Right: Presence Avatars & Clean Actions */}
+      <div className="flex items-center space-x-2.5">
+        {/* Collaborators */}
+        <div className="flex items-center -space-x-1.5 mr-1">
           {onlineUsers.slice(0, 4).map((user) => (
             <div
               key={user.userId}
-              title={`${user.name} (Active)`}
-              className="w-7 h-7 rounded-full border-2 border-slate-900 flex items-center justify-center text-xs font-bold text-white shadow-sm transition-transform hover:scale-110 hover:z-10"
+              title={`${user.name}`}
+              className="w-6 h-6 rounded-full border border-[#0A0B0D] flex items-center justify-center text-[10px] font-medium text-white shadow-sm"
               style={{ backgroundColor: user.color }}
             >
               {user.name.charAt(0).toUpperCase()}
             </div>
           ))}
           {onlineUsers.length > 4 && (
-            <div className="w-7 h-7 rounded-full border-2 border-slate-900 bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
+            <div className="w-6 h-6 rounded-full border border-[#0A0B0D] bg-neutral-800 flex items-center justify-center text-[10px] font-medium text-neutral-300">
               +{onlineUsers.length - 4}
             </div>
           )}
@@ -119,18 +110,18 @@ export const Header: React.FC<HeaderProps> = ({ boardId, initialTitle, onTitleCh
         {/* Share Button */}
         <button
           onClick={handleShare}
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition"
+          className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-neutral-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition"
         >
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+          {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5 text-neutral-400" />}
           <span>{copied ? 'Copied' : 'Share'}</span>
         </button>
 
-        {/* Export Button */}
+        {/* Export Button - Clean Monochrome Contrast */}
         <button
           onClick={() => setExportModalOpen(true)}
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition"
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium text-neutral-950 bg-white hover:bg-neutral-200 transition shadow-sm"
         >
-          <Download className="w-3.5 h-3.5" />
+          <Download className="w-3.5 h-3.5 text-neutral-900" />
           <span>Export</span>
         </button>
       </div>
